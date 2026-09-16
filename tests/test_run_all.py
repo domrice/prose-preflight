@@ -16,9 +16,7 @@ CONFIG = FIXTURE.parent / "config.yaml"
 
 
 def test_report_shape_and_counts():
-    out = report(
-        FIXTURE, load_config(str(CONFIG)), ["terminology"]
-    )
+    out = report(FIXTURE, load_config(str(CONFIG)), ["terminology"])
     assert out["total"] == 6
     assert out["counts"]["severity"] == {"warning": 6}
     assert out["counts"]["section"] == {"Methods": 4, "Results": 2}
@@ -29,9 +27,7 @@ def test_report_shape_and_counts():
 
 def test_cap_truncates_and_records_what_it_dropped():
     out = capped(
-        report(
-            FIXTURE, load_config(str(CONFIG)), ["terminology"]
-        ),
+        report(FIXTURE, load_config(str(CONFIG)), ["terminology"]),
         2,
     )
     assert out["total"] == 6
