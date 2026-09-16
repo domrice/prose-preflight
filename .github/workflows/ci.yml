@@ -1,0 +1,22 @@
+name: ci
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --locked
+      - run: uv run ruff check . && uv run ruff format --check .
+      - run: uv run pytest
+      - run: uv build
+      # Runs the package the way uvx will, with no repo on disk. A real
+      # invocation, not `--version`: that never loads default.yaml, so a config
+      # missing from the wheel would still pass. It also proves the bundled Vale
+      # binary resolves in a fresh environment.
+      - name: Smoke-test the wheel
+        run: |
+          uv run --isolated --with dist/*.whl \
+            prose-preflight tests/fixtures/units.md > report.json
+          jq -e '.total > 0 and (.counts.category | has("units"))' report.json

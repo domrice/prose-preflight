@@ -1,0 +1,16 @@
+{
+  "name": "prose-preflight",
+  "owner": {
+    "name": "Dominik Reisach"
+  },
+  "description": "Deterministic prose preflight checks for scientific writing, as an installable Claude Code plugin.",
+  "plugins": [
+    {
+      "name": "prose-preflight",
+      "source": "./",
+      "description": "Run deterministic prose checkers over a manuscript and fix what the JSON report reports.",
+      "category": "writing",
+      "keywords": ["prose", "writing", "proofreading", "scientific-writing"]
+    }
+  ]
+}

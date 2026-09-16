@@ -1,0 +1,25 @@
+# Publishes to PyPI when a v* tag is pushed. Uses trusted publishing, so there is no
+# API token to store: configure the publisher once at
+# https://pypi.org/manage/project/prose-preflight/settings/publishing/
+# (owner: domrice, repo: prose-preflight, workflow: release.yml, environment: pypi).
+name: release
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write # trusted publishing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --locked
+      - run: uv run pytest
+      - name: Check the tag matches the packaged version
+        run: |
+          test "v$(uv run python -c 'from importlib.metadata import version; print(version("prose-preflight"))')" = "${GITHUB_REF_NAME}"
+      - run: uv build
+      - uses: pypa/gh-action-pypi-publish@release/v1

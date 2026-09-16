@@ -1,0 +1,63 @@
+# Bundled config. A user file passed with --config is deep-merged over this one.
+# Rule keys land here alongside their checkers; a new document convention is a
+# YAML edit, never a code change.
+checks:
+  terminology:
+    enabled: true
+    severity: warning
+    ignore_case: true
+    # preferred form: variants that should become it
+    terms:
+      dataset: [data set, data-set]
+      machine learning: [machine-learning]
+      neural network: [neural net, neuralnet]
+      preprocessing: [pre-processing, pre processing]
+      ground truth: [ground-truth, groundtruth]
+      state of the art: [state-of-the art, state of the-art]
+      workflow: [work flow, work-flow]
+  readability:
+    enabled: true
+    severity: warning
+    min_words: 50        # sections shorter than this score as noise
+    min_flesch: 30.0     # below: hard to read
+    max_fog: 18.0        # above: too many long words per sentence
+  sentence_length:
+    enabled: true
+    severity: warning
+    max_words: 40
+  acronym:
+    enabled: true
+    severity: warning
+    min_uses: 1          # raise to ignore one-off mentions
+    # never expanded: too common, or not really acronyms
+    allowlist: [API, CPU, GPU, RAM, PDF, HTML, JSON, YAML, XML, CSV, URL, USA, EU, UK,
+                ID, OK, TODO, FAQ, PhD, DOI, ISBN, GDP, AM, PM, UTC, ISO, IEEE, ACM]
+  structure:
+    enabled: true
+    severity: error          # a missing section
+    order_severity: warning  # a section out of order
+    required_sections: [Abstract, Introduction, Methods, Results, Discussion, References]
+  units:
+    enabled: true
+    severity: warning
+    disabled_rules: []   # any of: space_before_unit, percent_spacing, range_dash, p_value_spacing
+    units: [mm, cm, m, km, mg, g, kg, ms, s, min, h, Hz, kHz, MHz, GHz, kB, MB, GB, TB,
+            W, kW, V, A, K, °C, °F, px, dpi, bp, mol, N, Pa, J, kJ]
+  claim:
+    enabled: true            # severity is always `review`; never auto-applied
+    hedges: [may, might, could, possibly, perhaps, arguably, seems to, appears to,
+             somewhat, relatively, fairly, rather, quite, suggests that, tends to]
+    boosters: [clearly, obviously, undoubtedly, certainly, definitely, significantly,
+               dramatically, drastically, vastly, extremely, profoundly, unprecedented,
+               groundbreaking, revolutionary, novel, optimal, perfect, proves, proven]
+  vale:
+    enabled: true
+    timeout: 60
+    # Vale's own config, kept as data. Built-in `Vale.*` rules only: no `vale sync`,
+    # no downloaded styles, so runs stay offline and deterministic. Point
+    # `config_file` at your own .vale.ini to use styles you have synced.
+    config_file: null
+    ini: |
+      MinAlertLevel = suggestion
+      [*.{md,markdown,txt}]
+      BasedOnStyles = Vale
