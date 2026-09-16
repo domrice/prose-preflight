@@ -12,6 +12,11 @@ edit the document — not errors, not mechanical suggestions. Fixes happen only 
 asks for a specific one in a later turn. `skills/prose-preflight/SKILL.md` is the binding
 agent contract: report, never edit, never auto-apply `review`.
 
+No model is ever called from inside the Python — that would cost determinism, offline runs,
+and per-run money, which is the same trade that ruled out LanguageTool. Judgment lives in the
+agent turn: preflight gives `review` findings a verdict, and `prose-deepread` is the one
+opt-in exception to "never read the source", run only when the user asks for it by name.
+
 ## The token-efficiency contract
 
 This is the reason the project exists. Violating it defeats the skill.
@@ -41,6 +46,7 @@ src/prose_preflight/
   checks/       acronym claim readability sentence_length structure terminology units vale
                 + _text.py (shared helpers) + __init__.py (CHECKERS registry)
 skills/prose-preflight/SKILL.md   the agent-facing workflow
+skills/prose-deepread/SKILL.md    the opt-in full-read pass (the only thing allowed to read the source)
 .claude-plugin/                   plugin.json + marketplace.json
 ```
 

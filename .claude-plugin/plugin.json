@@ -8,5 +8,5 @@
   "repository": "https://github.com/domrice/prose-preflight",
   "license": "MIT",
   "keywords": ["prose", "writing", "proofreading", "vale", "readability", "scientific-writing"],
-  "skills": ["./skills/prose-preflight"]
+  "skills": ["./skills/prose-preflight", "./skills/prose-deepread"]
 }

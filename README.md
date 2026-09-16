@@ -80,6 +80,22 @@ Findings are capped round-robin across categories, so 400 Vale alerts cannot cro
 one missing Methods section. `counts` and `total` always cover everything; `truncated` says
 what was dropped.
 
+## The two skills
+
+The CLI is deterministic on purpose — offline, no API key, same input same output. So
+nothing calls a model inside it. The judgment lives in the agent that drives it, where
+it is free, and it ships as two skills:
+
+- **`prose-preflight`** runs the command and reports it, but does not just print it. It
+  diagnoses what the counts mean, and gives every `severity: review` finding a verdict —
+  `keep`, `soften`, or `cut`, with a rewrite. The checker can see that a hedge is there;
+  only the agent can weigh it against the argument. It never edits the document.
+- **`prose-deepread`** is the opposite of preflight: it reads the manuscript end to end
+  and looks for what no regex can reach — claims the results do not support, terms used
+  before they are defined, sections that do not deliver what their heading promises, and
+  passages that can be cut without losing an argument. Expensive, so it runs only when
+  you ask for it by name. It never edits either.
+
 ## Config
 
 Every check is configurable from one YAML file. Write it once per project:
