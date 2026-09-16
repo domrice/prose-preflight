@@ -20,7 +20,7 @@ MISSING = (
 
 def check(doc: Document, rule: dict) -> list[Finding]:
     try:
-        alerts = _run(doc.path, rule)
+        alerts = _run(doc, rule)
     except (OSError, subprocess.SubprocessError, json.JSONDecodeError) as exc:
         return [
             Finding(
@@ -55,11 +55,12 @@ def check(doc: Document, rule: dict) -> list[Finding]:
     ]
 
 
-def _run(path: Path, rule: dict) -> list[dict]:
-    """Invoke Vale on `path`. Vale exits nonzero when it finds alerts, so only the
-    JSON on stdout decides success."""
+def _run(doc: Document, rule: dict) -> list[dict]:
+    """Invoke Vale on the document. Vale exits nonzero when it finds alerts, so only
+    the JSON on stdout decides success."""
     with tempfile.TemporaryDirectory() as tmp:
         ini = rule.get("config_file") or _write_ini(Path(tmp), rule)
+        path = _readable(doc, Path(tmp))
         result = subprocess.run(
             ["vale", "--output=JSON", f"--config={ini}", str(path)],
             capture_output=True,
@@ -71,6 +72,17 @@ def _run(path: Path, rule: dict) -> list[dict]:
         raise subprocess.SubprocessError(result.stderr.strip() or "no output")
     report = json.loads(result.stdout)
     return [alert for alerts in report.values() for alert in alerts]
+
+
+def _readable(doc: Document, tmp: Path) -> Path:
+    """Vale parses Markdown and plain text; it has no LaTeX reader, and pointed at a
+    .tex file it would flag the preamble and every command. `doc.masked` is already
+    the prose alone, line for line, so any other format goes to Vale as masked text."""
+    if doc.path.suffix.lower() in {".md", ".markdown", ".txt"}:
+        return doc.path
+    masked = tmp / f"{doc.path.stem}.txt"
+    masked.write_text("\n".join(doc.masked))
+    return masked
 
 
 def _write_ini(tmp: Path, rule: dict) -> Path:

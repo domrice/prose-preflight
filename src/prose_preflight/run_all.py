@@ -16,14 +16,28 @@ from prose_preflight.checks import CHECKERS
 from prose_preflight.extract import read
 
 DEFAULT_CONFIG = files("prose_preflight") / "default.yaml"
+REPORT_NAME = "PREFLIGHT_{stem}.md"  # written on every run; --md moves it
+PROJECT_CONFIG = "prose-preflight.yaml"  # picked up from the working directory
 SEVERITY_ORDER = {"error": 0, "warning": 1, "review": 2}
 
 
 def load_config(override: str | None) -> dict:
     config = yaml.safe_load(DEFAULT_CONFIG.read_text()) or {}
     if override:
-        merge(config, yaml.safe_load(Path(override).read_text()) or {})
+        user = yaml.safe_load(Path(override).read_text()) or {}
+        warn_unknown_keys(config, user)
+        merge(config, user)
     return config
+
+
+def warn_unknown_keys(base: dict, over: dict, path: str = "") -> None:
+    """A typo merges in silently and does nothing; say so on stderr."""
+    for key, value in over.items():
+        where = f"{path}{key}"
+        if key not in base:
+            print(f"prose-preflight: unknown config key {where!r}", file=sys.stderr)
+        elif isinstance(value, dict) and isinstance(base[key], dict):
+            warn_unknown_keys(base[key], value, f"{where}.")
 
 
 def merge(base: dict, over: dict) -> dict:
@@ -121,12 +135,14 @@ def _cap(findings: list[dict], cap: int) -> list[int]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(prog="prose-preflight")
-    parser.add_argument("file")
+    parser.add_argument("file", nargs="?")
     parser.add_argument(
         "--version", action="version", version=version("prose-preflight")
     )
     parser.add_argument(
-        "--config", help="YAML file deep-merged over the bundled config"
+        "--config",
+        help=f"YAML deep-merged over the bundled config "
+        f"(default: ./{PROJECT_CONFIG} when it exists)",
     )
     parser.add_argument(
         "--checks",
@@ -135,15 +151,38 @@ def main() -> int:
         default=list(CHECKERS),
     )
     parser.add_argument("--max-findings", type=int, default=20, help="0 lifts the cap")
-    parser.add_argument("--md", help="write the full Markdown report to this path")
+    parser.add_argument(
+        "--init-config",
+        nargs="?",
+        const="prose-preflight.yaml",
+        metavar="PATH",
+        help="write the commented default config there (default: prose-preflight.yaml) and exit",
+    )
+    parser.add_argument(
+        "--md",
+        metavar="PATH",
+        help=f"where the full Markdown report goes (default: ./{REPORT_NAME})",
+    )
     args = parser.parse_args()
 
+    if args.init_config:
+        Path(args.init_config).write_text(DEFAULT_CONFIG.read_text())
+        print(f"wrote {args.init_config}", file=sys.stderr)
+        return 0
+    if not args.file:
+        parser.error("a file is required")
     if unknown := [name for name in args.checks if name not in CHECKERS]:
         parser.error(f"unknown check(s): {', '.join(unknown)}")
-    full = report(Path(args.file), load_config(args.config), args.checks)
-    if args.md:
-        Path(args.md).write_text(render_md(full))
-    json.dump(capped(full, args.max_findings), sys.stdout)
+    config = args.config
+    if not config and Path(PROJECT_CONFIG).is_file():  # discovery is the CLI's job,
+        config = PROJECT_CONFIG  # never load_config's
+        print(f"prose-preflight: using {PROJECT_CONFIG}", file=sys.stderr)
+    full = report(Path(args.file), load_config(config), args.checks)
+    # one report per document, so checking a second file never clobbers the first
+    md = args.md or REPORT_NAME.format(stem=Path(args.file).stem)
+    Path(md).write_text(render_md(full))
+    print(f"prose-preflight: wrote {md}", file=sys.stderr)
+    json.dump(capped(full, args.max_findings) | {"report": md}, sys.stdout)
     return 0
 
 

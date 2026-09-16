@@ -12,7 +12,8 @@ FIXTURES = Path(__file__).parent / "fixtures"
 
 def run():
     doc = read(FIXTURES / "terminology.md")
-    return CHECKERS["terminology"](doc, load_config(None)["checks"]["terminology"])
+    config = load_config(str(FIXTURES / "config.yaml"))
+    return CHECKERS["terminology"](doc, config["checks"]["terminology"])
 
 
 def test_matches_expected_pairs():

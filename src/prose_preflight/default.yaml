@@ -6,21 +6,18 @@ checks:
     enabled: true
     severity: warning
     ignore_case: true
-    # preferred form: variants that should become it
-    terms:
-      dataset: [data set, data-set]
-      machine learning: [machine-learning]
-      neural network: [neural net, neuralnet]
-      preprocessing: [pre-processing, pre processing]
-      ground truth: [ground-truth, groundtruth]
-      state of the art: [state-of-the art, state of the-art]
-      workflow: [work flow, work-flow]
+    # Preferred form: variants that should become it. Empty by default -- the right
+    # spellings are your journal's, not ours. Uncomment and edit:
+    terms: {}
+      # dataset: [data set, data-set]
+      # machine learning: [machine-learning]
+      # ground truth: [ground-truth, groundtruth]
   readability:
     enabled: true
     severity: warning
-    min_words: 50        # sections shorter than this score as noise
-    min_flesch: 30.0     # below: hard to read
-    max_fog: 18.0        # above: too many long words per sentence
+    min_words: 50 # sections shorter than this score as noise
+    min_flesch: 30.0 # below: hard to read
+    max_fog: 18.0 # above: too many long words per sentence
   sentence_length:
     enabled: true
     severity: warning
@@ -28,28 +25,129 @@ checks:
   acronym:
     enabled: true
     severity: warning
-    min_uses: 1          # raise to ignore one-off mentions
+    min_uses: 1 # raise to ignore one-off mentions
     # never expanded: too common, or not really acronyms
-    allowlist: [API, CPU, GPU, RAM, PDF, HTML, JSON, YAML, XML, CSV, URL, USA, EU, UK,
-                ID, OK, TODO, FAQ, PhD, DOI, ISBN, GDP, AM, PM, UTC, ISO, IEEE, ACM]
+    allowlist:
+      [
+        API,
+        CPU,
+        GPU,
+        RAM,
+        PDF,
+        HTML,
+        JSON,
+        YAML,
+        XML,
+        CSV,
+        URL,
+        USA,
+        EU,
+        UK,
+        ID,
+        OK,
+        TODO,
+        FAQ,
+        PhD,
+        DOI,
+        ISBN,
+        GDP,
+        AM,
+        PM,
+        UTC,
+        ISO,
+        IEEE,
+        ACM,
+      ]
   structure:
     enabled: true
-    severity: error          # a missing section
-    order_severity: warning  # a section out of order
-    required_sections: [Abstract, Introduction, Methods, Results, Discussion, References]
+    severity: error # a missing section
+    order_severity: warning # a section out of order
+    # Empty by default: most documents are fragments, not whole papers. Set the list to
+    # opt in, e.g. [Abstract, Introduction, Methods, Results, Discussion, References].
+    required_sections: []
   units:
     enabled: true
     severity: warning
-    disabled_rules: []   # any of: space_before_unit, percent_spacing, range_dash, p_value_spacing
-    units: [mm, cm, m, km, mg, g, kg, ms, s, min, h, Hz, kHz, MHz, GHz, kB, MB, GB, TB,
-            W, kW, V, A, K, °C, °F, px, dpi, bp, mol, N, Pa, J, kJ]
+    disabled_rules: [] # any of: space_before_unit, percent_spacing, range_dash, p_value_spacing
+    units:
+      [
+        mm,
+        cm,
+        m,
+        km,
+        mg,
+        g,
+        kg,
+        ms,
+        s,
+        min,
+        h,
+        Hz,
+        kHz,
+        MHz,
+        GHz,
+        kB,
+        MB,
+        GB,
+        TB,
+        W,
+        kW,
+        V,
+        A,
+        K,
+        °C,
+        °F,
+        px,
+        dpi,
+        bp,
+        mol,
+        N,
+        Pa,
+        J,
+        kJ,
+      ]
   claim:
-    enabled: true            # severity is always `review`; never auto-applied
-    hedges: [may, might, could, possibly, perhaps, arguably, seems to, appears to,
-             somewhat, relatively, fairly, rather, quite, suggests that, tends to]
-    boosters: [clearly, obviously, undoubtedly, certainly, definitely, significantly,
-               dramatically, drastically, vastly, extremely, profoundly, unprecedented,
-               groundbreaking, revolutionary, novel, optimal, perfect, proves, proven]
+    enabled: true # severity is always `review`; never auto-applied
+    hedges:
+      [
+        may,
+        might,
+        could,
+        possibly,
+        perhaps,
+        arguably,
+        seems to,
+        appears to,
+        somewhat,
+        relatively,
+        fairly,
+        rather,
+        quite,
+        suggests that,
+        tends to,
+      ]
+    boosters:
+      [
+        clearly,
+        obviously,
+        undoubtedly,
+        certainly,
+        definitely,
+        significantly,
+        dramatically,
+        drastically,
+        vastly,
+        extremely,
+        profoundly,
+        unprecedented,
+        groundbreaking,
+        revolutionary,
+        novel,
+        optimal,
+        perfect,
+        proves,
+        proven,
+      ]
   vale:
     enabled: true
     timeout: 60

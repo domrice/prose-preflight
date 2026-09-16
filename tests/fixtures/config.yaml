@@ -1,0 +1,12 @@
+# Fixture config: the bundled defaults ship empty `terms`, so the terminology
+# fixtures supply their own.
+checks:
+  terminology:
+    terms:
+      dataset: [data set, data-set]
+      machine learning: [machine-learning]
+      neural network: [neural net, neuralnet]
+      preprocessing: [pre-processing, pre processing]
+      ground truth: [ground-truth, groundtruth]
+      state of the art: [state-of-the art, state of the-art]
+      workflow: [work flow, work-flow]

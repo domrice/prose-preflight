@@ -2,7 +2,7 @@
 
 # Prose Preflight
 
-**Your manuscript, checked by scripts. Read by an agent that never opens it.**
+**Your manuscript, checked by scripts, read by an agent.**
 
 [![PyPI](https://img.shields.io/pypi/v/prose-preflight?style=flat-square&logo=pypi&logoColor=white&color=fa934e&labelColor=121417)](https://pypi.org/project/prose-preflight/)
 [![Python](https://img.shields.io/badge/python-%E2%89%A5%203.11-fa934e?style=flat-square&logo=python&logoColor=white&labelColor=121417)](https://www.python.org)
@@ -20,7 +20,7 @@
 > compact JSON report. The scripts analyze; the agent reports. Same input, same findings,
 > every time.
 
-An LLM asked to proofread a paper will read all 9,000 words into its context, forget the
+An LLM asked to proofread a text will read all 9,000 words into its context, forget the
 middle, and confidently invent a citation error on page 4. This tool doesn't. The checkers
 find the problems and hand over line, column, and a short excerpt — the agent summarizes
 that and never reads the manuscript to find anything.
@@ -43,7 +43,7 @@ npx skills@latest add domrice/prose-preflight
 **3. CLI only, no agent** — for CI or pre-commit
 
 ```bash
-uvx prose-preflight paper.md
+uvx prose-preflight text.md
 ```
 
 **4. From source** (contributors)
@@ -60,15 +60,17 @@ its own interpreter, so route 3 needs nothing but [uv](https://docs.astral.sh/uv
 ## Use
 
 ```bash
-uvx prose-preflight paper.md --md PREFLIGHT.md
+uvx prose-preflight text.md
 ```
 
-The full report goes to `PREFLIGHT.md`; a capped JSON summary goes to stdout. That split is
+The full report is written to `PREFLIGHT_text.md` — one per document, so checking a second
+file never overwrites the first. A capped JSON summary goes to stdout, with `report` naming
+that file. That split is
 the whole point — the agent reads stdout, links the file, and stays small.
 
 | flag               | does                                             |
 | ------------------ | ------------------------------------------------ |
-| `--md PATH`        | write the full Markdown report there             |
+| `--md PATH`        | move the report (default `PREFLIGHT_<file>.md`)  |
 | `--max-findings N` | cap stdout findings (default `20`; `0` lifts it) |
 | `--checks a,b`     | run a subset                                     |
 | `--config FILE`    | deep-merge a YAML file over the bundled config   |
@@ -78,36 +80,24 @@ Findings are capped round-robin across categories, so 400 Vale alerts cannot cro
 one missing Methods section. `counts` and `total` always cover everything; `truncated` says
 what was dropped.
 
-## Checks
-
-| check                                                                               | flags                                                             | severity      |
-| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------- |
-| `vale.*`                                                                            | grammar, spelling, style — whatever your Vale config says         | error/warning |
-| `terminology.variant`                                                               | `dataset` where the config wants `data set`                       | warning       |
-| `acronym.undefined`                                                                 | used without expansion at first use                               | warning       |
-| `structure.missing_section` · `.section_order`                                      | required sections, absent or out of order                         | error/warning |
-| `sentence_length.long`                                                              | sentences over `max_words`                                        | warning       |
-| `readability.flesch` · `.fog`                                                       | per section, skipping ones too short to score                     | warning       |
-| `units.space_before_unit` · `.percent_spacing` · `.range_dash` · `.p_value_spacing` | `12 mm` → NBSP, `5 %` → `5%`, `3-7` → `3–7`, `p<.05` → `p < 0.05` | warning       |
-| `claim.hedge` · `.booster`                                                          | "may possibly suggest", "clearly demonstrates"                    | **review**    |
-
-`review` is not a quieter warning. It is the line between what a script can decide and what
-it cannot: hedging and overclaiming are judgment calls about whether your evidence carries
-your claim. Nothing marked `review` is ever auto-applied, by either the tool or the agent.
-
-Code, math, verbatim blocks, and LaTeX command sequences are blanked before any regex runs —
-character-for-character, so every offset stays a true source position. Your equations are
-not prose and are not judged as such.
-
 ## Config
 
-One config ships inside the package. Override per project:
+Every check is configurable from one YAML file. Write it once per project:
 
 ```bash
-uvx prose-preflight paper.md --config prose-preflight.yaml
+uvx prose-preflight --init-config    # writes prose-preflight.yaml, every key commented
+uvx prose-preflight text.md         # picked up automatically from the working directory
 ```
 
-Your file is deep-merged over the bundled one, so you write only what differs:
+A `prose-preflight.yaml` next to where you run is used without any flag; `--config FILE`
+points elsewhere. Keep only what you change — the rest falls back to the defaults. Lists are
+replaced, not appended, and unknown keys are reported on stderr, so a typo never fails
+silently.
+
+Two lists ship **empty**, because there is no universal right answer and a wrong entry costs
+you a false positive on every run: `terminology.terms` (your journal's preferred spellings)
+and `structure.required_sections` (most documents are fragments, not whole papers). Fill
+them in and those checks switch on.
 
 ```yaml
 checks:
@@ -126,11 +116,36 @@ checks:
 Everything a document convention needs lives in YAML. If a new convention would need a code
 change, that's a bug in the checker, not a missing feature.
 
+## Checks
+
+| check                                                                               | flags                                                             | severity      |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------- |
+| `vale.*`                                                                            | grammar, spelling, style — whatever your Vale config says         | error/warning |
+| `terminology.variant`                                                               | `dataset` where the config wants `data set` (opt-in: `terms`)     | warning       |
+| `acronym.undefined`                                                                 | used without expansion at first use                               | warning       |
+| `structure.missing_section` · `.section_order`                                      | required sections, absent or out of order (opt-in)                | error/warning |
+| `sentence_length.long`                                                              | sentences over `max_words`                                        | warning       |
+| `readability.flesch` · `.fog`                                                       | per section, skipping ones too short to score                     | warning       |
+| `units.space_before_unit` · `.percent_spacing` · `.range_dash` · `.p_value_spacing` | `12 mm` → NBSP, `5 %` → `5%`, `3-7` → `3–7`, `p<.05` → `p < 0.05` | warning       |
+| `claim.hedge` · `.booster`                                                          | "may possibly suggest", "clearly demonstrates"                    | **review**    |
+
+`review` is not a quieter warning. It is the line between what a script can decide and what
+it cannot: hedging and overclaiming are judgment calls about whether your evidence carries
+your claim. Nothing marked `review` is ever auto-applied, by either the tool or the agent.
+
+Code, math, verbatim blocks, and LaTeX command sequences are blanked before any regex runs —
+character-for-character, so every offset stays a true source position. Your equations are
+not prose and are not judged as such.
+
 ## Vale
 
 [Vale](https://vale.sh) powers grammar and style and is pinned as a dependency — no
 `brew install`, no manual step. The binary is fetched once on first run and cached; after
 that, runs are offline.
+
+Vale has no LaTeX reader, so a `.tex` file is handed to it as masked prose — commands,
+preamble, math, and verbatim already blanked, line for line — and the alerts still carry true
+source positions. Markdown and plain text go to Vale directly, parsed by its own reader.
 
 If that download is blocked (air-gapped machine, proxy, locked-down CI), the run emits one
 `vale.unavailable` warning and the other seven checkers still report. Vale is never a hard
@@ -144,7 +159,7 @@ brew install vale     # or: apt install vale / scoop install vale
 
 ```bash
 uv sync                                    # from the lockfile
-uv run prose-preflight paper.md --md out.md
+uv run prose-preflight text.md --md out.md
 uv run pytest                              # all tests
 uv run pytest tests/test_checks.py -k units
 uv run ruff check . && uv run ruff format .

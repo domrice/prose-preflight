@@ -15,20 +15,25 @@ JSON report, summarize it. **Do not edit the document.**
 ## Run
 
 ```bash
-uvx prose-preflight FILE --md PREFLIGHT.md
+uvx prose-preflight FILE
 ```
 
-The tool writes the **full** report to `PREFLIGHT.md` itself and prints a capped JSON
-summary to stdout. You read only stdout. Never transcribe findings into the file by
+The tool writes the **full** report to `PREFLIGHT_<filename>.md` itself and prints a
+capped JSON summary to stdout, whose `report` field is where that file landed — always
+take the path from there rather than guessing it. You read only stdout. Never transcribe findings into the file by
 hand — that would pull every finding through context, which is the thing this design
 exists to avoid.
 
 `FILE` is the path the user gave. If they gave none, ask for one — never guess, never
 scan the repo.
 
-Options: `--md PATH` (write the full Markdown report there), `--config FILE` (YAML
-deep-merged over the bundled config), `--checks a,b` (subset), `--max-findings N`
-(default 20; `0` lifts the stdout cap — rarely needed once `--md` is used).
+A `prose-preflight.yaml` in the working directory is picked up automatically; say so in
+your report when the run prints `using prose-preflight.yaml` on stderr.
+
+Options: `--config FILE` (YAML
+deep-merged over the bundled config; the project file is used when this is omitted), `--checks a,b` (subset), `--md PATH`
+(move the Markdown report), `--max-findings N` (default 20; `0` lifts the stdout cap —
+rarely needed, the full report is already on disk).
 
 Vale ships with the package. If its binary is unavailable anyway, the run emits one
 `vale.unavailable` warning and every other check still reports.
@@ -38,6 +43,7 @@ Vale ships with the package. If its binary is unavailable anyway, the run emits 
 ```json
 {
   "file": "paper.md",
+  "report": "PREFLIGHT_paper.md",
   "checks": ["acronym", "claim", "readability", "..."],
   "total": 87,
   "counts": {"severity": {...}, "category": {...}, "section": {...}},
@@ -68,10 +74,10 @@ round-robin across categories so one noisy category cannot crowd out the rest;
 
 ## What to give the user
 
-Keep the chat message short; `PREFLIGHT.md` holds the detail.
+Keep the chat message short; the report file holds the detail.
 
-1. **Headline:** total, counts by severity and category, and the path to
-   `PREFLIGHT.md`.
+1. **Headline:** total, counts by severity and category, and the report path from
+   the `report` field.
 2. **Errors** from the stdout summary: `file:line` · message · `suggestion` when
    present.
 3. **Warnings**, collapsed by check ("14× terminology.variant 'dataset' → 'data set'"),

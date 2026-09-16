@@ -12,10 +12,13 @@ from prose_preflight.finding import Finding
 from prose_preflight.run_all import _cap, capped, load_config, report
 
 FIXTURE = Path(__file__).parent / "fixtures" / "terminology.md"
+CONFIG = FIXTURE.parent / "config.yaml"
 
 
 def test_report_shape_and_counts():
-    out = report(FIXTURE, load_config(None), ["terminology"])
+    out = report(
+        FIXTURE, load_config(str(CONFIG)), ["terminology"]
+    )
     assert out["total"] == 6
     assert out["counts"]["severity"] == {"warning": 6}
     assert out["counts"]["section"] == {"Methods": 4, "Results": 2}
@@ -25,7 +28,12 @@ def test_report_shape_and_counts():
 
 
 def test_cap_truncates_and_records_what_it_dropped():
-    out = capped(report(FIXTURE, load_config(None), ["terminology"]), 2)
+    out = capped(
+        report(
+            FIXTURE, load_config(str(CONFIG)), ["terminology"]
+        ),
+        2,
+    )
     assert out["total"] == 6
     assert len(out["findings"]) == 2
     assert out["truncated"] == {"terminology": 4}
@@ -63,7 +71,7 @@ def test_unknown_check_is_a_usage_error():
 
 
 @pytest.mark.parametrize("flag", [[], ["--max-findings", "0"]])
-def test_stdout_is_json_only(flag):
+def test_stdout_is_json_only(flag, tmp_path):
     result = subprocess.run(
         [
             sys.executable,
@@ -72,6 +80,10 @@ def test_stdout_is_json_only(flag):
             str(FIXTURE),
             "--checks",
             "terminology",
+            "--config",
+            str(CONFIG),
+            "--md",
+            str(tmp_path / "PREFLIGHT.md"),
             *flag,
         ],
         capture_output=True,
@@ -90,6 +102,8 @@ def test_md_holds_every_finding_while_stdout_stays_capped(tmp_path):
             "-m",
             "prose_preflight.run_all",
             str(FIXTURE),
+            "--config",
+            str(CONFIG),
             "--md",
             str(md),
             "--max-findings",

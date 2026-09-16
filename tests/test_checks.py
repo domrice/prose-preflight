@@ -13,8 +13,23 @@ FIXTURES = Path(__file__).parent / "fixtures"
 NAMES = ["acronym", "claim", "readability", "sentence_length", "structure", "units"]
 
 
+# `required_sections` is empty by default (opt-in), so the structure fixture supplies one.
+EXTRA_RULES = {
+    "structure": {
+        "required_sections": [
+            "Abstract",
+            "Introduction",
+            "Methods",
+            "Results",
+            "Discussion",
+            "References",
+        ]
+    }
+}
+
+
 def rule(name):
-    return load_config(None)["checks"].get(name, {})
+    return load_config(None)["checks"].get(name, {}) | EXTRA_RULES.get(name, {})
 
 
 def run(name):
@@ -34,7 +49,9 @@ def test_matches_expected_pairs(name):
 def test_disabled_by_config(name):
     """Disabling is the runner's gate now, not the checker's."""
     config = load_config(None)
-    config["checks"].setdefault(name, {})["enabled"] = False
+    config["checks"].setdefault(name, {}).update(
+        EXTRA_RULES.get(name, {}), enabled=False
+    )
     data = report(FIXTURES / f"{name}.md", config, [name])
     assert data["findings"] == []
 
@@ -62,3 +79,14 @@ def test_structure_flags_missing_and_order():
 
 def test_readability_skips_short_sections():
     assert {f.section for f in run("readability")} == {"Abstract"}
+
+
+def test_warn_unknown_keys_recurses(capsys):
+    from prose_preflight.run_all import warn_unknown_keys
+
+    warn_unknown_keys(
+        {"checks": {"acronym": {"min_uses": 1}}},
+        {"checks": {"acronym": {"min_use": 2}, "typo": {}}},
+    )
+    err = capsys.readouterr().err
+    assert "'checks.acronym.min_use'" in err and "'checks.typo'" in err
