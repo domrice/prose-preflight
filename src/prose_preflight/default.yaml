@@ -11,6 +11,9 @@ contract:
   venue: null # journal, conference, course, or team -- and its style guide
   voice: null # person, tense, passive/active, formality
   notes: null # anything else: banned words, citation style, house rules
+  guide: null # path to a Markdown writing guide, e.g. PROSE.md -- the long-form rules
+  # that outgrew `notes`. Read by prose-draft, prose-edit, and prose-deepread; never by
+  # a checker, and never by prose-preflight.
   format: null # md | tex | txt -- what prose-draft writes, and its comment syntax
 
 checks:

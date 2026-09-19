@@ -1,6 +1,6 @@
 {
   "name": "prose",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Deterministic prose checkers for scientific writing, plus five thin skills that drive them: one command, one compact JSON report.",
   "author": {
     "name": "Dominik Reisach"

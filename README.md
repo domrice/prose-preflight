@@ -85,6 +85,7 @@ contract:
   audience: graphics researchers, non-specialist in differentiable rendering
   venue: SIGGRAPH — ACM house style, numbered citations
   voice: first person plural, past tense for methods, active where possible
+  guide: PROSE.md # the long-form rules; see below
   format: tex # md | tex | txt
 
 checks:
@@ -100,6 +101,15 @@ checks:
   units:
     disabled_rules: [range_dash] # if your venue insists on hyphens
 ```
+
+`contract.guide` points at a Markdown file — `PROSE.md` by convention, written by
+`/prose-init` beside the YAML. `notes:` is a scalar, good for a house rule or two;
+anything that becomes a list that grows belongs in the guide, under topic headings, one
+rule per bullet. `prose-draft`, `prose-edit`, and `prose-deepread` read it and treat it
+as part of the contract; where a guide rule and a contract key disagree, the guide is the
+more specific statement and wins. `prose-preflight` deliberately does not read it, so a
+routine check never pays for it. A guide that is named but missing stops the two skills
+that write.
 
 Keep only what you change; the rest falls back to defaults. Lists are replaced, not appended,
 and unknown keys are reported on stderr, so a typo never fails silently.

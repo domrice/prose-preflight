@@ -33,6 +33,11 @@ block comes back in the JSON — that is the project's writing contract, and it 
 you judge `review` findings against. If `contract` is empty, offer `prose-init` in your
 next steps, once, and move on.
 
+`contract.guide`, when present, is a path to a Markdown rulebook for the skills that
+write. **Do not open it.** Reading a file because a report mentioned it is exactly the
+habit this skill exists to avoid; `prose-draft`, `prose-edit`, and `prose-deepread` read
+it when they need it.
+
 Options: `--config FILE` (deep-merged over the bundled config; the project file is used
 when this is omitted), `--checks a,b` (subset), `--md PATH` (move the Markdown report),
 `--max-findings N` (default 20; `0` lifts the stdout cap — rarely needed, the full

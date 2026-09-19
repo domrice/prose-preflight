@@ -138,6 +138,15 @@ names the format `prose-draft` writes and the comment syntax of the `prose-draft
 never reach a report; plain text has no comment syntax, so a `txt` marker is visible to the
 checkers — the cost of allowing that format.
 
+`contract.guide` is the contract's escape hatch for rules that outgrow a YAML scalar: a
+path to a Markdown file (`PROSE.md` by convention) that `prose-draft`, `prose-edit`, and
+`prose-deepread` read as part of the contract.
+`prose-preflight` is told not to open it — a report that names a file is not a licence to
+read it. The config stays YAML because `checks:` is structured data; parsing that out of
+Markdown would be exactly the code change this design forbids.
+
 `prose-init` conducts the interview and writes the file by piping JSON answers into
 `prose-preflight --init`: the agent supplies data, Python serializes and validates. A skill
 hand-writing YAML would be non-deterministic, which is the trade this repo never makes.
+`PROSE.md` is the one file a skill writes directly, and that is not the rule bending: it is
+prose, and serializing prose buys nothing.

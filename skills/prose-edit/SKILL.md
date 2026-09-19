@@ -20,6 +20,12 @@ Say the contract is missing, point at `prose-init`, and stop. Do not fall back t
 good prose: the contract is the only reason this skill can be trusted to rewrite someone's
 sentence.
 
+If `contract.guide` is set, read that file too — it is part of the contract, the
+long-form half. **Named but missing is a broken contract:** say so, point at
+`prose-init`, and stop, exactly as for a missing `prose-preflight.yaml`. An unset
+`guide` is not missing; it means the project has no guide, and the YAML is the whole
+contract.
+
 ## 2. Selection — hard gate
 
 Act on the items the user named, and only those. Two sources:
@@ -78,13 +84,14 @@ marker; the user strips them when they have reviewed the passage.
 
 ## The contract is the rule of law
 
-`voice`, `venue`, `audience`, and `notes` override every default below, **including the
-default toward concision**. If the contract asks for formal, expansive, third-person
-passive prose, write that and do not argue. `checks.terminology.terms` gives the preferred
-spelling of every term it lists; `checks.acronym.allowlist` says which acronyms need no
-expansion. Use them.
+`voice`, `venue`, `audience`, `notes`, and every rule in the guide override every default
+below, **including the default toward concision**. If the contract asks for formal,
+expansive, third-person passive prose, write that and do not argue. Where a guide rule and
+a contract key disagree, the guide is the more specific statement and wins.
+`checks.terminology.terms` gives the preferred spelling of every term it lists;
+`checks.acronym.allowlist` says which acronyms need no expansion. Use them.
 
-**Where the contract is silent**, and only there: one idea per sentence. The claim before
+**Where the contract is silent** — both files — and only there: one idea per sentence. The claim before
 the qualification. Active voice. No throat-clearing ("It is important to note that"), no
 metadiscourse ("In this section we will"), no word that earns nothing but length. Every
 fact, number, and citation in the original survives the rewrite.
@@ -97,6 +104,7 @@ Report in two or three lines: what changed, where, and what you skipped and why.
 ## Hard rules
 
 - **No `prose-preflight.yaml`, no edit.** Run `prose-init` first.
+- **A guide named by `contract.guide` and missing from disk is a stop, not a warning.**
 - **Only selected items.** Never fix something you noticed along the way — report it and
   let the user select it.
 - **Never apply without preview approval** in this conversation.

@@ -25,6 +25,11 @@ over-explaining in pass 4; venue and voice decide what counts as overclaiming in
 Without it, you are judging against generic good prose; say so once, and suggest
 `prose-init`.
 
+If `contract.guide` is set, read that file too — its rules are the long-form half of the
+contract, and what passes 1 and 4 judge against. You are already reading the whole
+manuscript; one small file is noise against that budget. A guide that is named but
+missing is a warning here, not a stop: say so once and judge against the rest.
+
 ## The four passes
 
 Read the document once, then work through all four. Everything you emit is a judgment

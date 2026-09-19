@@ -21,6 +21,12 @@ Do not fall back to generic good prose, and do not ask the contract questions in
 say the contract is missing, point at `prose-init`, and stop. Everything below is defined
 relative to the contract, so there is nothing to fall back to.
 
+If `contract.guide` is set, read that file too — it is part of the contract, the
+long-form half. **Named but missing is a broken contract:** say so, point at
+`prose-init`, and stop, exactly as for a missing `prose-preflight.yaml`. An unset
+`guide` is not missing; it means the project has no guide, and the YAML is the whole
+contract.
+
 ## 2. Content — hard gate
 
 **Never write prose from a topic.** "Write my methods section" is not content. Content is
@@ -49,13 +55,14 @@ next step — offer it, never run it.
 
 ## The contract is the rule of law
 
-`voice`, `venue`, `audience`, and `notes` override every default below, including the
-default toward concision. If the contract asks for formal, expansive, third-person
-passive prose, write that and do not argue. `checks.terminology.terms` gives the
-preferred spelling of every term it lists; `checks.acronym.allowlist` says which
-acronyms need no expansion. Use them.
+`voice`, `venue`, `audience`, `notes`, and every rule in the guide override every default
+below, including the default toward concision. If the contract asks for formal, expansive,
+third-person passive prose, write that and do not argue. Where a guide rule and a contract
+key disagree, the guide is the more specific statement and wins.
+`checks.terminology.terms` gives the preferred spelling of every term it lists;
+`checks.acronym.allowlist` says which acronyms need no expansion. Use them.
 
-**Where the contract is silent**, and only there: one idea per sentence. The claim before
+**Where the contract is silent** — both files — and only there: one idea per sentence. The claim before
 the qualification. Active voice. No throat-clearing ("It is important to note that"), no
 metadiscourse ("In this section we will"), no word that earns nothing but length. Every
 noun the user supplied survives; nothing appears that they did not supply.
@@ -81,6 +88,7 @@ Never remove a marker. The user strips them when they have reviewed the passage.
 ## Hard rules
 
 - **No `prose-preflight.yaml`, no draft.** Run `prose-init` first.
+- **A guide named by `contract.guide` and missing from disk is a stop, not a warning.**
 - **Never draft without content from the user.** Questions, not prose.
 - **Never insert without outline approval** in this conversation.
 - **Insert only.** Never rewrite, reflow, or delete existing text — this skill adds
