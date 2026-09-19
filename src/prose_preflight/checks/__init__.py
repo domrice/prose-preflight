@@ -1,4 +1,4 @@
-"""Checker registry. Adding a checker is adding a module and one line here."""
+"""Checker registry. Adding a checker is adding a module and one name here."""
 
 from prose_preflight.checks import (
     acronym,
@@ -12,14 +12,17 @@ from prose_preflight.checks import (
 )
 
 CHECKERS = {
-    "acronym": acronym.check,
-    "claim": claim.check,
-    "readability": readability.check,
-    "sentence_length": sentence_length.check,
-    "structure": structure.check,
-    "terminology": terminology.check,
-    "units": units.check,
-    "vale": vale.check,
+    module.__name__.rsplit(".", 1)[1]: module.check
+    for module in (
+        acronym,
+        claim,
+        readability,
+        sentence_length,
+        structure,
+        terminology,
+        units,
+        vale,
+    )
 }
 
 __all__ = ["CHECKERS"]

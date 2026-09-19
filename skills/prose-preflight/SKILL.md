@@ -28,7 +28,10 @@ exists to avoid.
 scan the repo.
 
 A `prose-preflight.yaml` in the working directory is picked up automatically; say so in
-your report when the run prints `using prose-preflight.yaml` on stderr.
+your report when the run prints `using prose-preflight.yaml` on stderr. Its `contract`
+block comes back in the JSON — that is the project's writing contract, and it is what
+you judge `review` findings against. If `contract` is empty, offer `prose-init` in your
+next steps, once, and move on.
 
 Options: `--config FILE` (deep-merged over the bundled config; the project file is used
 when this is omitted), `--checks a,b` (subset), `--md PATH` (move the Markdown report),
@@ -45,6 +48,7 @@ Vale ships with the package. If its binary is unavailable anyway, the run emits 
   "file": "paper.md",
   "report": "PREFLIGHT_paper.md",
   "checks": ["acronym", "claim", "readability", "..."],
+  "contract": {"document": "journal article", "audience": "...", "venue": "...", "voice": "..."},
   "total": 87,
   "counts": {"severity": {...}, "category": {...}, "section": {...}},
   "truncated": {"style": 37},
@@ -79,12 +83,16 @@ Keep the chat message short; the report file holds the detail.
    not listed one by one.
 4. **Review items**, in their own section, each with a **verdict**: `keep`, `soften`,
    or `cut`, plus a one-line rewrite. These are hedges and boosters — the checker can
-   only see that the word is there, you can weigh it against the argument. Judge from
+   only see that the word is there, you can weigh it against the argument. Weigh it
+   against `contract` — venue and audience decide what counts as overclaiming, voice
+   decides what counts as too hedged — not against generic good prose. Judge from
    the `excerpt` and whatever of the document is already in context; where the excerpt
    is too thin to judge, say so rather than guessing. A verdict is a recommendation,
    never an edit.
 5. **Next steps:** two or three concrete options, each naming what you would run, e.g.
-   "apply the 14 terminology fixes", "accept the soften verdicts", "run prose-deepread
+   "apply the 14 terminology fixes", "accept the soften verdicts", "run prose-edit to
+   apply the ones you pick", "run prose-init to
+   set the contract" (only when `contract` is empty), "run prose-deepread
    for claim-vs-evidence and define-before-use — it reads the whole document, so it is
    slower and costs more context than this run".
 

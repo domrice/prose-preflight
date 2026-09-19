@@ -52,6 +52,19 @@ def test_paragraphs_and_sections(tmp_path):
     assert doc.section_at(18) == "Results"
 
 
+def test_html_comments_are_masked_across_lines(tmp_path):
+    """prose-draft writes `<!-- prose-draft -->` above every paragraph it drafts; the
+    checkers must never see it."""
+    path = tmp_path / "doc.md"
+    path.write_text(
+        "<!-- prose-draft -->\nDrafted prose here.\n\n<!-- a\nb -->\nMore.\n"
+    )
+    doc = read(path)
+    assert all(len(m) == len(s) for m, s in zip(doc.masked, doc.lines))
+    assert [n for n, _ in doc.prose()] == [2, 6]
+    assert doc.masked[0].strip() == "" and doc.masked[3:5] == ["      ", "     "]
+
+
 def test_plain_text_recognizes_nothing(tmp_path):
     path = tmp_path / "doc.txt"
     path.write_text(DOC)
@@ -105,3 +118,34 @@ def test_latex_masks_preamble_verbatim_math_and_comments(tmp_path):
     assert " ".join(doc.masked[5].split()) == "We sampled the corpus and ran it."
     assert " ".join(doc.masked[15].split()) == "More prose, inline math here."
     assert doc.section_at(16) == "Methods"
+
+
+ARGS = r"""Timber is strong \cite{smith2020} and wrapped \cite{a,
+b} too.
+See \includegraphics[width=0.8\textwidth]{figures/plan_v2.png} and \SI{5}{\kilo\newton}.
+Kept: \textbf{bold \emph{text}} and \footnote{a note}.
+"""
+
+
+def test_latex_blanks_non_prose_arguments(tmp_path):
+    path = tmp_path / "args.tex"
+    path.write_text(ARGS)
+    doc = read(path)
+    assert all(len(m) == len(s) for m, s in zip(doc.masked, doc.lines))
+    text = " ".join(" ".join(m.split()) for m in doc.masked).strip()
+    assert (
+        text
+        == "Timber is strong and wrapped too. See and . Kept: bold text and a note ."
+    )
+
+
+def test_setext_headings(tmp_path):
+    path = tmp_path / "setext.md"
+    path.write_text(
+        "---\ntitle: front matter\n---\n\nTitle\n=====\n\nSub\n---\n\n"
+        "A paragraph\nthat wraps\n---\n"
+    )
+    doc = read(path)
+    assert doc.headings == [(5, 1, "Title"), (8, 2, "Sub")]
+    # the underline is blanked, so it never becomes a paragraph of its own
+    assert (6, 6) not in doc.paragraphs

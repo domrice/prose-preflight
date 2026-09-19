@@ -15,129 +15,107 @@
 
 ---
 
-> No server. No API key. No network. No opinions about your argument.
-> Eight deterministic checkers read a Markdown, LaTeX, or plain-text manuscript and emit one
-> compact JSON report. The scripts analyze; the agent reports. Same input, same findings,
-> every time.
+> No server. No API key. No network. Five agent skills over eight deterministic checkers.
+> Same input, same findings, every time.
 
-An LLM asked to proofread a text will read all 9,000 words into its context, forget the
-middle, and confidently invent a citation error on page 4. This tool doesn't. The checkers
-find the problems and hand over line, column, and a short excerpt — the agent summarizes
-that and never reads the manuscript to find anything.
+An LLM asked to proofread a text reads all 9,000 words into its context, forgets the middle,
+and invents a citation error on page 4. This doesn't. The checkers find the problems and
+hand over line, column, and a short excerpt; the agent judges and reports, and never reads
+the manuscript to find anything.
 
 ## Install
 
-**1. Claude Code plugin**
+**Claude Code plugin**
 
 ```
 /plugin marketplace add domrice/prose-preflight
-/plugin install prose-preflight
+/plugin install prose
 ```
 
-**2. Any other harness** (Cursor, Codex, Copilot, Gemini, Windsurf, …)
+**Any other harness** (Cursor, Codex, Copilot, Gemini, Windsurf, …)
 
 ```bash
 npx skills@latest add domrice/prose-preflight
 ```
 
-**3. CLI only, no agent** — for CI or pre-commit
+Both resolve the package from PyPI — no repo on disk, no paths in `SKILL.md`. Needs
+[uv](https://docs.astral.sh/uv/); it supplies its own [Python ≥ 3.11](https://www.python.org).
 
-```bash
-uvx prose-preflight text.md
+## The five skills
+
+```
+/prose-init         once per project — writes the contract
+/prose-preflight    check and report            ┐
+/prose-deepread     read end to end and report  ┘ never edit
+/prose-draft        write new prose             ┐
+/prose-edit         apply findings you picked   ┘ only with your yes
 ```
 
-**4. From source** (contributors)
+- **`prose-init`** interviews you once — what you are writing, who reads it, which venue and
+  style, which terms and acronyms — and writes `prose-preflight.yaml`. The other four read it.
+- **`prose-preflight`** runs the checkers and diagnoses the result: what the counts mean, and
+  a verdict on every `severity: review` finding — `keep`, `soften`, or `cut`, with a rewrite.
+  A checker can see a hedge; only the agent can weigh it against your argument.
+- **`prose-deepread`** is the opposite: it reads the manuscript end to end for what no regex
+  reaches — claims the results do not support, terms used before they are defined, sections
+  that do not deliver what their heading promises, passages that can go. Expensive, so it
+  runs only when you ask for it by name.
+- **`prose-draft`** is the only one that writes new text. Give it content — bullets, notes,
+  numbers — and it proposes an outline, waits for your yes, drafts against the contract, and
+  inserts under the heading you named. No contract, no draft; no content, only questions.
+- **`prose-edit`** closes the loop: it applies the findings you picked out of a report, and
+  only those. It reads the paragraph around each finding rather than the file, previews every
+  change before touching disk, and marks what it changed. A `review` finding is edited only
+  because you named it.
 
-```bash
-git clone https://github.com/domrice/prose-preflight && cd prose-preflight
-uv sync && uv run pytest
-```
+## The contract
 
-Routes 1–3 resolve the package from PyPI, so none of them needs the repo on disk and
-`SKILL.md` carries no paths. Needs [Python ≥ 3.11](https://www.python.org); `uvx` supplies
-its own interpreter, so route 3 needs nothing but [uv](https://docs.astral.sh/uv/).
+One file per project, `prose-preflight.yaml`, holds both halves of your setup. Run
+`/prose-init` once; it writes the file through the tool, so the YAML is serialized and its
+keys validated, never hand-typed. A `prose-preflight.yaml` in the working directory is
+picked up automatically.
 
-## Use
-
-```bash
-uvx prose-preflight text.md
-```
-
-The full report is written to `PREFLIGHT_text.md` — one per document, so checking a second
-file never overwrites the first. A capped JSON summary goes to stdout, with `report` naming
-that file. That split is
-the whole point — the agent reads stdout, links the file, and stays small.
-
-| flag               | does                                             |
-| ------------------ | ------------------------------------------------ |
-| `--md PATH`        | move the report (default `PREFLIGHT_<file>.md`)  |
-| `--max-findings N` | cap stdout findings (default `20`; `0` lifts it) |
-| `--checks a,b`     | run a subset                                     |
-| `--config FILE`    | deep-merge a YAML file over the bundled config   |
-| `--version`        | the packaged version                             |
-
-Findings are capped round-robin across categories, so 400 Vale alerts cannot crowd out the
-one missing Methods section. `counts` and `total` always cover everything; `truncated` says
-what was dropped.
-
-## The two skills
-
-The CLI is deterministic on purpose — offline, no API key, same input same output. So
-nothing calls a model inside it. The judgment lives in the agent that drives it, where
-it is free, and it ships as two skills:
-
-- **`prose-preflight`** runs the command and reports it, but does not just print it. It
-  diagnoses what the counts mean, and gives every `severity: review` finding a verdict —
-  `keep`, `soften`, or `cut`, with a rewrite. The checker can see that a hedge is there;
-  only the agent can weigh it against the argument. It never edits the document.
-- **`prose-deepread`** is the opposite of preflight: it reads the manuscript end to end
-  and looks for what no regex can reach — claims the results do not support, terms used
-  before they are defined, sections that do not deliver what their heading promises, and
-  passages that can be cut without losing an argument. Expensive, so it runs only when
-  you ask for it by name. It never edits either.
-
-## Config
-
-Every check is configurable from one YAML file. Write it once per project:
-
-```bash
-uvx prose-preflight --init-config    # writes prose-preflight.yaml, every key commented
-uvx prose-preflight text.md         # picked up automatically from the working directory
-```
-
-A `prose-preflight.yaml` next to where you run is used without any flag; `--config FILE`
-points elsewhere. Keep only what you change — the rest falls back to the defaults. Lists are
-replaced, not appended, and unknown keys are reported on stderr, so a typo never fails
-silently.
-
-Two lists ship **empty**, because there is no universal right answer and a wrong entry costs
-you a false positive on every run: `terminology.terms` (your journal's preferred spellings)
-and `structure.required_sections` (most documents are fragments, not whole papers). Fill
-them in and those checks switch on.
+The `contract:` block is **agent-facing** — no checker reads it, but every report carries it,
+so the agent judging your hedges knows whether "may indicate" is right for your journal. The
+`checks:` block is the deterministic half.
 
 ```yaml
+contract:
+  document: conference paper
+  audience: graphics researchers, non-specialist in differentiable rendering
+  venue: SIGGRAPH — ACM house style, numbered citations
+  voice: first person plural, past tense for methods, active where possible
+  format: tex # md | tex | txt
+
 checks:
   terminology:
     terms:
-      finite element: [finite-element, FE]
+      ray tracing: [raytracing, ray-tracing]
+      signed distance field: [SDF, signed-distance field]
   sentence_length:
     max_words: 32
   structure:
     required_sections:
-      [Abstract, Introduction, Methods, Results, Discussion, References]
+      [Abstract, Introduction, Related Work, Method, Results, Conclusion, References]
   units:
-    disabled_rules: [range_dash] # if your journal insists on hyphens
+    disabled_rules: [range_dash] # if your venue insists on hyphens
 ```
 
+Keep only what you change; the rest falls back to defaults. Lists are replaced, not appended,
+and unknown keys are reported on stderr, so a typo never fails silently.
+
+Two lists ship **empty**, because a wrong entry costs a false positive on every run:
+`terminology.terms` and `structure.required_sections`. Fill them in and those checks switch on.
+
 Everything a document convention needs lives in YAML. If a new convention would need a code
-change, that's a bug in the checker, not a missing feature.
+change, that's a bug in the checker.
 
 ## Checks
 
 | check                                                                               | flags                                                             | severity      |
 | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------- |
 | `vale.*`                                                                            | grammar, spelling, style — whatever your Vale config says         | error/warning |
-| `terminology.variant`                                                               | `dataset` where the config wants `data set` (opt-in: `terms`)     | warning       |
+| `terminology.variant`                                                               | `dataset` where the config wants `data set` (opt-in)              | warning       |
 | `acronym.undefined`                                                                 | used without expansion at first use                               | warning       |
 | `structure.missing_section` · `.section_order`                                      | required sections, absent or out of order (opt-in)                | error/warning |
 | `sentence_length.long`                                                              | sentences over `max_words`                                        | warning       |
@@ -146,39 +124,33 @@ change, that's a bug in the checker, not a missing feature.
 | `claim.hedge` · `.booster`                                                          | "may possibly suggest", "clearly demonstrates"                    | **review**    |
 
 `review` is not a quieter warning. It is the line between what a script can decide and what
-it cannot: hedging and overclaiming are judgment calls about whether your evidence carries
-your claim. Nothing marked `review` is ever auto-applied, by either the tool or the agent.
+it cannot: whether your evidence carries your claim. Nothing marked `review` is ever
+auto-applied, by the tool or the agent.
 
 Code, math, verbatim blocks, and LaTeX command sequences are blanked before any regex runs —
-character-for-character, so every offset stays a true source position. Your equations are
-not prose and are not judged as such.
+character-for-character, so every offset stays a true source position. Your equations are not
+prose and are not judged as such.
+
+The full report lands in `PREFLIGHT_<file>.md`, one per document; only a capped summary goes
+through the agent's context. That split is the whole point.
 
 ## Vale
 
 [Vale](https://vale.sh) powers grammar and style and is pinned as a dependency — no
 `brew install`, no manual step. The binary is fetched once on first run and cached; after
-that, runs are offline.
+that, runs are offline. If that download is blocked (air-gapped, proxy, locked-down CI), the
+run emits one `vale.unavailable` warning and the other seven checkers still report. Vale is
+never a hard prerequisite; install it yourself and it's picked up from `PATH`.
 
 Vale has no LaTeX reader, so a `.tex` file is handed to it as masked prose — commands,
 preamble, math, and verbatim already blanked, line for line — and the alerts still carry true
-source positions. Markdown and plain text go to Vale directly, parsed by its own reader.
-
-If that download is blocked (air-gapped machine, proxy, locked-down CI), the run emits one
-`vale.unavailable` warning and the other seven checkers still report. Vale is never a hard
-prerequisite. Install it yourself and it's picked up from `PATH`:
-
-```bash
-brew install vale     # or: apt install vale / scoop install vale
-```
+source positions.
 
 ## Develop
 
 ```bash
-uv sync                                    # from the lockfile
-uv run prose-preflight text.md --md out.md
-uv run pytest                              # all tests
-uv run pytest tests/test_checks.py -k units
-uv run ruff check . && uv run ruff format .
+git clone https://github.com/domrice/prose-preflight && cd prose-preflight
+uv sync && uv run pytest
 ```
 
 Every checker has a fixture pair in `tests/fixtures/`: an intentionally flawed document and

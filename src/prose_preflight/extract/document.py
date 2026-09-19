@@ -28,8 +28,9 @@ class Document:
 
     def section_at(self, line: int) -> str | None:
         """Title of the nearest heading at or above `line`."""
-        prior = [title for start, _, title in self.headings if start <= line]
-        return prior[-1] if prior else None
+        return next(
+            (t for start, _, t in reversed(self.headings) if start <= line), None
+        )
 
     def prose(self):
         """Yield (line, masked_text) for every line outside code and math."""

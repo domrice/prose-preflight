@@ -46,11 +46,6 @@ def sentences(text: str):
         yield start, text[start:]
 
 
-def truncate(text: str, limit: int) -> str:
-    """First `limit` characters, with an ellipsis when something was cut."""
-    return text[:limit].strip() + ("\u2026" if len(text) > limit else "")
-
-
 def excerpt(line: str, start: int, end: int, pad: int = 30) -> str:
     left, right = max(0, start - pad), min(len(line), end + pad)
     return (

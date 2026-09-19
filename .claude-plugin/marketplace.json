@@ -6,7 +6,7 @@
   "description": "Deterministic prose preflight checks for scientific writing, as an installable Claude Code plugin.",
   "plugins": [
     {
-      "name": "prose-preflight",
+      "name": "prose",
       "source": "./",
       "description": "Run deterministic prose checkers over a manuscript and fix what the JSON report reports.",
       "category": "writing",

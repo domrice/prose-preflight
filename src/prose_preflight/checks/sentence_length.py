@@ -1,6 +1,6 @@
 """Sentence-length outliers. Regex segmentation, word count against a YAML maximum."""
 
-from prose_preflight.checks._text import WORD, paragraphs, sentences, truncate
+from prose_preflight.checks._text import WORD, paragraphs, sentences
 from prose_preflight.extract import Document
 from prose_preflight.finding import Finding
 
@@ -14,6 +14,7 @@ def check(doc: Document, rule: dict) -> list[Finding]:
             words = len(WORD.findall(sentence))
             if words <= maximum:
                 continue
+            short = sentence[:40].strip() + ("\u2026" if len(sentence) > 40 else "")
             line, col = positions[offset]
             findings.append(
                 Finding(
@@ -22,7 +23,7 @@ def check(doc: Document, rule: dict) -> list[Finding]:
                     severity=severity,
                     line=line,
                     col=col,
-                    excerpt=truncate(sentence, 40),
+                    excerpt=short,
                     message=f"Sentence runs {words} words (limit {maximum}); split it.",
                     section=doc.section_at(line),
                 )

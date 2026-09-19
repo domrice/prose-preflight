@@ -19,6 +19,12 @@ If `prose-preflight` has not run on this file yet, run it first and report that
 separately. It catches the mechanical problems cheaply, so this pass does not spend
 context re-finding them.
 
+Read `prose-preflight.yaml` when it exists — it is one small file, and its `contract`
+block says what this document is meant to be. Audience decides what counts as
+over-explaining in pass 4; venue and voice decide what counts as overclaiming in pass 1.
+Without it, you are judging against generic good prose; say so once, and suggest
+`prose-init`.
+
 ## The four passes
 
 Read the document once, then work through all four. Everything you emit is a judgment
@@ -59,7 +65,8 @@ up nothing, say so in one line and move on — a clean pass is a real result.
 ## Hard rules
 
 - **Never edit the document.** The report is the deliverable. Edit only when the user
-  asks for a specific fix in a later turn.
+  asks for a specific fix in a later turn — that is `prose-edit`, and it acts only on the
+  items they pick out of this report.
 - **Never invent a citation, a result, or a number** to fill a gap you found. Report the
   gap.
 - Do not repeat what `prose-preflight` already reported. If it has not run, run it first

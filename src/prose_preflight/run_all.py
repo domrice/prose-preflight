@@ -67,6 +67,9 @@ def report(path: Path, config: dict, checks: list[str]) -> dict:
     return {
         "file": str(path),
         "checks": checks,
+        # agent-facing, no checker reads it; unset keys are dropped so an untouched
+        # contract arrives as {} and the agent can offer prose-init
+        "contract": {k: v for k, v in (config.get("contract") or {}).items() if v},
         "total": len(findings),
         "counts": {
             field: _counts(findings, field)
@@ -84,16 +87,20 @@ def capped(data: dict, cap: int) -> dict:
     dropped, per category."""
     if not cap:
         return data
-    keep = set(_cap(data["findings"], cap))
-    kept, dropped = [], []
-    for i, finding in enumerate(data["findings"]):
-        (kept if i in keep else dropped).append(finding)
-    return data | {"truncated": _counts(dropped, "category"), "findings": kept}
+    findings = data["findings"]
+    keep = set(_cap(findings, cap))
+    dropped = [f for i, f in enumerate(findings) if i not in keep]
+    return data | {
+        "truncated": _counts(dropped, "category"),
+        "findings": [findings[i] for i in sorted(keep)],
+    }
 
 
 def render_md(data: dict) -> str:
     """Full report as Markdown, grouped by severity then category."""
-    lines = [f"# Preflight: {data['file']}", "", f"{data['total']} findings."]
+    lines = [f"# Preflight: {data['file']}", ""]
+    lines += [f"- **{k}:** {v}" for k, v in data["contract"].items() if v]
+    lines += ["", f"{data['total']} findings."]
     for field, counts in data["counts"].items():
         lines += [
             "",
@@ -152,11 +159,12 @@ def main() -> int:
     )
     parser.add_argument("--max-findings", type=int, default=20, help="0 lifts the cap")
     parser.add_argument(
-        "--init-config",
+        "--init",
         nargs="?",
-        const="prose-preflight.yaml",
+        const=PROJECT_CONFIG,
         metavar="PATH",
-        help="write the commented default config there (default: prose-preflight.yaml) and exit",
+        help=f"read config answers as JSON on stdin, write them there as YAML "
+        f"(default: {PROJECT_CONFIG}) and exit",
     )
     parser.add_argument(
         "--md",
@@ -165,9 +173,13 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    if args.init_config:
-        Path(args.init_config).write_text(DEFAULT_CONFIG.read_text())
-        print(f"wrote {args.init_config}", file=sys.stderr)
+    if args.init:
+        answers = json.load(sys.stdin)
+        warn_unknown_keys(load_config(None), answers)
+        Path(args.init).write_text(
+            yaml.safe_dump(answers, sort_keys=False, allow_unicode=True)
+        )
+        print(f"wrote {args.init}", file=sys.stderr)
         return 0
     if not args.file:
         parser.error("a file is required")

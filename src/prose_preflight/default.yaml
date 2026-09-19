@@ -1,6 +1,18 @@
 # Bundled config. A user file passed with --config is deep-merged over this one.
 # Rule keys land here alongside their checkers; a new document convention is a
 # YAML edit, never a code change.
+
+# Agent-facing. Never read by a checker; echoed into the report so the agent driving
+# prose-preflight and prose-deepread knows what this document is meant to be.
+# Written by the prose-init skill.
+contract:
+  document: null # journal article | thesis chapter | report | proposal | docs
+  audience: null # who reads it, and what they already know
+  venue: null # journal, conference, course, or team -- and its style guide
+  voice: null # person, tense, passive/active, formality
+  notes: null # anything else: banned words, citation style, house rules
+  format: null # md | tex | txt -- what prose-draft writes, and its comment syntax
+
 checks:
   terminology:
     enabled: true
