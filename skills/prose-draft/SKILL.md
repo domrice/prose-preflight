@@ -41,7 +41,8 @@ be. Then stop and wait. Asking twice is cheaper than a paragraph of fiction.
 
 Before any prose, propose:
 
-- the passage's claim, in one sentence;
+- the passage's claim, in one sentence — when the heading carries a `prose-outline`
+  intent comment, the claim delivers it, and you say so where it cannot;
 - one line per paragraph: what it does, and which of the user's inputs it uses;
 - the target file and the heading the passage lands under.
 
@@ -83,7 +84,8 @@ The `md` and `tex` markers are masked by the extractor, so they never reach a pr
 report. Plain text has no comment syntax: the `txt` marker **is** visible to the
 checkers. Say so once, the first time you write into a `txt` document.
 
-Never remove a marker. The user strips them when they have reviewed the passage.
+Never remove a marker, and never a `prose-outline` intent comment. The user strips them
+when they have reviewed the passage.
 
 ## Hard rules
 

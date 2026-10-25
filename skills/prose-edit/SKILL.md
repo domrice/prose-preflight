@@ -80,7 +80,8 @@ Say so once, the first time you edit a `txt` document.
 
 A paragraph that already carries a `prose-draft` marker keeps it and gains a `prose-edit`
 marker. Never swap one for the other — the pair is the honest record. Never remove a
-marker; the user strips them when they have reviewed the passage.
+marker or a `prose-outline` intent comment; the user strips them when they have reviewed
+the passage. A selected item that moves a section moves its intent comment with it.
 
 ## The contract is the rule of law
 

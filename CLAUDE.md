@@ -12,14 +12,17 @@ runs, and per-run money — the same trade that ruled out LanguageTool. Judgment
 agent turn.
 
 **Writing boundary.** The checkers never edit. `prose-preflight` and `prose-deepread`
-report only. Two skills write, both narrowly:
+report only. Three skills write, all narrowly:
 
+- `prose-outline` adds structure, never prose — headings and one intent comment per
+  section, never without a plan approved in the same conversation. Moving or renaming
+  existing text it lists for `prose-edit`.
 - `prose-draft` adds prose that was not there — insert at an approved anchor, never rewrite
   or delete, never without an outline approved in the same conversation.
 - `prose-edit` changes prose that is — only findings the user picked out of a report,
   previewed before writing.
 
-Neither writes without `prose-preflight.yaml`. A `review` finding reaches the file only
+None writes without `prose-preflight.yaml`. A `review` finding reaches the file only
 because a human named it.
 
 ## The token-efficiency contract
@@ -48,7 +51,8 @@ src/prose_preflight/
   extract/      document.py (Document + shared passes), markdown.py, latex.py
   checks/       acronym claim readability sentence_length structure terminology units vale
                 + _text.py + __init__.py (CHECKERS registry)
-skills/         prose-init, prose-preflight, prose-deepread, prose-draft, prose-edit
+skills/         prose-init, prose-preflight, prose-deepread, prose-outline, prose-draft,
+                prose-edit
 .claude-plugin/ plugin.json + marketplace.json
 ```
 
@@ -133,8 +137,8 @@ agent judging `review` findings knows the document's audience, venue, and voice.
 as `checks:` deliberately — one init, one file, nothing to drift.
 
 `contract.format` (`md` | `tex` | `txt`) is the one key with a closed set of values. It
-names the format `prose-draft` writes and the comment syntax of the `prose-draft` /
-`prose-edit` markers. Markdown and LaTeX comments are masked by the extractors, so markers
+names the format `prose-draft` writes and the comment syntax of the `prose-outline`,
+`prose-draft`, and `prose-edit` markers. Markdown and LaTeX comments are masked by the extractors, so markers
 never reach a report; plain text has no comment syntax, so a `txt` marker is visible to the
 checkers — the cost of allowing that format.
 

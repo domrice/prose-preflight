@@ -7,6 +7,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 import pytest
+import yaml
 
 from prose_preflight.finding import Finding
 from prose_preflight.run_all import _cap, capped, load_config, report
@@ -87,6 +88,32 @@ def test_stdout_is_json_only(flag, tmp_path):
         check=True,
     )
     assert json.loads(result.stdout)["total"] == 6
+
+
+def test_init_merge_keeps_what_the_answers_leave_out(tmp_path):
+    """prose-outline sends only the sections; the contract must survive."""
+    path = tmp_path / "prose-preflight.yaml"
+    path.write_text(
+        "contract:\n  document: blog post\n"
+        "checks:\n  structure:\n    required_sections: [Old]\n"
+    )
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "prose_preflight.run_all",
+            "--init",
+            str(path),
+            "--merge",
+        ],
+        input='{"checks": {"structure": {"required_sections": ["Hook", "Payoff"]}}}',
+        text=True,
+        check=True,
+    )
+    assert yaml.safe_load(path.read_text()) == {
+        "contract": {"document": "blog post"},
+        "checks": {"structure": {"required_sections": ["Hook", "Payoff"]}},
+    }
 
 
 def test_md_holds_every_finding_while_stdout_stays_capped(tmp_path):

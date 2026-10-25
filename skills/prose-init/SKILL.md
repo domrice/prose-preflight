@@ -20,7 +20,8 @@ scalar — written only when the user has some.
 them, and validates the keys against the bundled defaults while it does.
 
 If `prose-preflight.yaml` already exists, read it, show what it says, and ask what to
-change. Re-run with the merged answers — the write replaces the file.
+change. Re-run with only the changed keys and `--merge`, which keeps the rest of the file;
+lists replace, so send a list whole.
 
 ## The questions
 

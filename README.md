@@ -41,18 +41,19 @@ npx skills@latest add domrice/prose-preflight
 Both resolve the package from PyPI — no repo on disk, no paths in `SKILL.md`. Needs
 [uv](https://docs.astral.sh/uv/); it supplies its own [Python ≥ 3.11](https://www.python.org).
 
-## The five skills
+## The six skills
 
 ```
 /prose-init         once per project — writes the contract
 /prose-preflight    check and report            ┐
 /prose-deepread     read end to end and report  ┘ never edit
-/prose-draft        write new prose             ┐
-/prose-edit         apply findings you picked   ┘ only with your yes
+/prose-outline      plan the sections           ┐
+/prose-draft        write new prose             │ only with your yes
+/prose-edit         apply findings you picked   ┘
 ```
 
 - **`prose-init`** interviews you once — what you are writing, who reads it, which venue and
-  style, which terms and acronyms — and writes `prose-preflight.yaml`. The other four read it.
+  style, which terms and acronyms — and writes `prose-preflight.yaml`. The other five read it.
 - **`prose-preflight`** runs the checkers and diagnoses the result: what the counts mean, and
   a verdict on every `severity: review` finding — `keep`, `soften`, or `cut`, with a rewrite.
   A checker can see a hedge; only the agent can weigh it against your argument.
@@ -60,6 +61,10 @@ Both resolve the package from PyPI — no repo on disk, no paths in `SKILL.md`. 
   reaches — claims the results do not support, terms used before they are defined, sections
   that do not deliver what their heading promises, passages that can go. Expensive, so it
   runs only when you ask for it by name.
+- **`prose-outline`** plans a new document or re-plans a draft: the claim, then one section
+  per question the reader asks. On your yes it writes headings and an intent comment under
+  each — never body text — and can record the headings as `required_sections`, so preflight
+  checks them from then on. Moving or renaming existing sections it lists for `prose-edit`.
 - **`prose-draft`** is the only one that writes new text. Give it content — bullets, notes,
   numbers — and it proposes an outline, waits for your yes, drafts against the contract, and
   inserts under the heading you named. No contract, no draft; no content, only questions.

@@ -48,6 +48,8 @@ acronyms.
 **3. Heading vs content.** Does each section deliver what its heading promises? Flag
 content sitting in the wrong section, headings that describe something the section no
 longer contains, and results discussed in Methods or method described in Results.
+Where a `prose-outline` intent comment sits under the heading, judge the section against
+that stated deliverable rather than the heading alone.
 
 **4. Cut for length.** Shorter is better. Flag what can go without losing an argument:
 a point already made elsewhere in the document, a paragraph that restates its own topic

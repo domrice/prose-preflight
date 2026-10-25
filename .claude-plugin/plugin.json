@@ -1,12 +1,12 @@
 {
   "name": "prose",
-  "version": "0.3.0",
-  "description": "Deterministic prose checkers for scientific writing, plus five thin skills that drive them: one command, one compact JSON report.",
+  "version": "0.4.0",
+  "description": "Deterministic prose checkers for scientific writing, plus six thin skills that drive them: one command, one compact JSON report.",
   "author": {
     "name": "Dominik Reisach"
   },
   "repository": "https://github.com/domrice/prose-preflight",
   "license": "MIT",
   "keywords": ["prose", "writing", "proofreading", "vale", "readability", "scientific-writing"],
-  "skills": ["./skills/prose-preflight", "./skills/prose-deepread", "./skills/prose-init", "./skills/prose-draft", "./skills/prose-edit"]
+  "skills": ["./skills/prose-preflight", "./skills/prose-deepread", "./skills/prose-init", "./skills/prose-outline", "./skills/prose-draft", "./skills/prose-edit"]
 }

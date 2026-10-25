@@ -167,6 +167,12 @@ def main() -> int:
         f"(default: {PROJECT_CONFIG}) and exit",
     )
     parser.add_argument(
+        "--merge",
+        action="store_true",
+        help="with --init: deep-merge the answers over the existing file instead of "
+        "replacing it; lists still replace",
+    )
+    parser.add_argument(
         "--md",
         metavar="PATH",
         help=f"where the full Markdown report goes (default: ./{REPORT_NAME})",
@@ -176,6 +182,8 @@ def main() -> int:
     if args.init:
         answers = json.load(sys.stdin)
         warn_unknown_keys(load_config(None), answers)
+        if args.merge and Path(args.init).is_file():
+            answers = merge(yaml.safe_load(Path(args.init).read_text()) or {}, answers)
         Path(args.init).write_text(
             yaml.safe_dump(answers, sort_keys=False, allow_unicode=True)
         )
