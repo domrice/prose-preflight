@@ -85,8 +85,15 @@ def test_warn_unknown_keys_recurses(capsys):
     from prose_preflight.run_all import warn_unknown_keys
 
     warn_unknown_keys(
-        {"checks": {"acronym": {"min_uses": 1}}},
-        {"checks": {"acronym": {"min_use": 2}, "typo": {}}},
+        {"checks": {"acronym": {"min_uses": 1}, "terminology": {"terms": {}}}},
+        {
+            "checks": {
+                "acronym": {"min_use": 2},
+                "typo": {},
+                "terminology": {"terms": {"dataset": ["data set"]}},
+            }
+        },
     )
     err = capsys.readouterr().err
     assert "'checks.acronym.min_use'" in err and "'checks.typo'" in err
+    assert "dataset" not in err

@@ -36,7 +36,8 @@ def warn_unknown_keys(base: dict, over: dict, path: str = "") -> None:
         where = f"{path}{key}"
         if key not in base:
             print(f"prose-preflight: unknown config key {where!r}", file=sys.stderr)
-        elif isinstance(value, dict) and isinstance(base[key], dict):
+        elif isinstance(value, dict) and isinstance(base[key], dict) and base[key]:
+            # an empty default is a free-form table (e.g. terms): its keys are the user's
             warn_unknown_keys(base[key], value, f"{where}.")
 
 

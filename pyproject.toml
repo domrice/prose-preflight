@@ -1,6 +1,6 @@
 [project]
 name = "prose-preflight"
-version = "0.4.0"
+version = "0.4.1"
 description = "Deterministic prose checkers for scientific writing, driven by an agent skill."
 readme = "README.md"
 license = "MIT"
